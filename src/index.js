@@ -9,23 +9,35 @@ import { runTwoScan } from "./algorithms/twoScan.js";
 dotenv.config();
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: process.env.CORS_ORIGINS.split(",") }));
 
-// ✅ Connect to MongoDB Atlas
+// ✅ CORS setup for React frontend (Vite default port 5173)
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "DELETE"],
+    credentials: true,
+  })
+);
+
+// ✅ MongoDB connection
 mongoose
   .connect(process.env.MONGO_URL)
   .then(() => console.log("✅ MongoDB is connected successfully"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// Generate random players
+// ✅ Generate random players
 app.post("/api/players/generate", async (req, res) => {
   try {
     const { count = 2 } = req.body;
+
+    // Delete old players before generating new ones
     await Player.deleteMany();
+
     const players = Array.from({ length: count }, (_, i) => ({
       name: `Player ${i + 1}`,
       score: Math.floor(Math.random() * 100),
     }));
+
     const savedPlayers = await Player.insertMany(players);
     res.json(savedPlayers);
   } catch (error) {
@@ -33,7 +45,7 @@ app.post("/api/players/generate", async (req, res) => {
   }
 });
 
-// Add player manually
+// ✅ Add player manually
 app.post("/api/players", async (req, res) => {
   try {
     const { name, score } = req.body;
@@ -44,26 +56,35 @@ app.post("/api/players", async (req, res) => {
   }
 });
 
-// Get all players
+// ✅ Get all players
 app.get("/api/players", async (req, res) => {
-  const players = await Player.find();
-  res.json(players);
+  try {
+    const players = await Player.find();
+    res.json(players);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
-// Delete all players
+// ✅ Delete all players
 app.delete("/api/players", async (req, res) => {
-  await Player.deleteMany();
-  res.json({ message: "All players deleted" });
+  try {
+    await Player.deleteMany();
+    res.json({ message: "All players deleted" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
-// Run algorithm
+// ✅ Run winner algorithms
 app.post("/api/run", async (req, res) => {
   try {
     const { method } = req.body;
     const players = await Player.find();
 
-    if (players.length < 2)
+    if (players.length < 2) {
       return res.status(400).json({ message: "Need at least 2 players" });
+    }
 
     let result;
     if (method === "tournament") {
@@ -80,6 +101,6 @@ app.post("/api/run", async (req, res) => {
   }
 });
 
-// Start server
-const PORT = process.env.PORT || 5002;
+// ✅ Start the server
+const PORT = process.env.PORT || 4075;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
