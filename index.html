@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tournament Winner Predictor</title>
+
+  <style>
+    /* --- Background --- */
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: radial-gradient(circle at center, #08143a, #020617);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    h1 {
+      margin-top: 30px;
+      text-align: center;
+      color: #00d4ff;
+      text-shadow: 0 0 15px #00d4ff;
+    }
+
+    /* --- Control Panel --- */
+    .controls {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 20px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    }
+
+    .controls input {
+      padding: 10px;
+      width: 100px;
+      border: none;
+      border-radius: 6px;
+      margin-right: 10px;
+    }
+
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      margin: 5px;
+      cursor: pointer;
+      background: linear-gradient(45deg, #00c3ff, #0072ff);
+      color: white;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px #00d4ff;
+    }
+
+    /* --- Player Cards --- */
+    .players {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 20px 0;
+      gap: 10px;
+    }
+
+    .player-card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      border-radius: 8px;
+      width: 120px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+    }
+
+    .player-card h4 {
+      margin: 5px 0;
+    }
+
+    /* --- Results --- */
+    .results {
+      margin-top: 20px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 15px;
+      width: 90%;
+      max-width: 500px;
+    }
+
+    .winner {
+      font-size: 1.2em;
+      color: gold;
+      text-shadow: 0 0 10px gold;
+    }
+
+    .runner {
+      font-size: 1.1em;
+      color: silver;
+      text-shadow: 0 0 8px silver;
+    }
+
+    .comparisons {
+      color: #00d4ff;
+      margin-top: 10px;
+    }
+
+    /* --- Manual Entry --- */
+    #manualPlayersContainer input {
+      padding: 5px;
+      margin: 5px;
+      border-radius: 6px;
+      border: none;
+    }
+
+  </style>
+</head>
+
+<body>
+  <h1>🏆 Tournament Winner Predictor</h1>
+
+  <div class="controls">
+    <label>Number of Players:</label>
+    <input type="number" id="playerCount" value="128" min="2" />
+    <button class="btn" onclick="generatePlayers()">Generate Random</button>
+    <button class="btn" onclick="showManualEntry()">Manual Entry</button>
+    <button class="btn" onclick="runAlgorithm('tournament')">Divide & Conquer</button>
+    <button class="btn" onclick="runAlgorithm('two-scan')">Iterative Scan</button>
+    <button class="btn" onclick="clearPlayers()">Clear All</button>
+  </div>
+
+  <!-- Manual Entry Box -->
+  <div id="manualEntryBox" class="controls" style="display:none;">
+    <h4>Enter Players Manually</h4>
+    <div id="manualPlayersContainer"></div>
+    <button class="btn" onclick="addManualPlayer()">Add Player</button>
+    <button class="btn" onclick="submitManualPlayers()">Submit Players</button>
+  </div>
+
+  <div id="playerList" class="players"></div>
+
+  <div id="resultBox" class="results" style="display: none;">
+    <h3>Result</h3>
+    <div class="winner">🏅 Winner: <span id="winnerName"></span></div>
+    <div class="runner">🥈 Runner-Up: <span id="runnerName"></span></div>
+    <div class="comparisons">Comparisons Made: <span id="comparisonCount"></span></div>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:4075/api";
+
+    // --- Random Generation ---
+    async function generatePlayers() {
+      const count = document.getElementById("playerCount").value;
+      const res = await fetch(`${API_URL}/players/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ count }),
+      });
+      const data = await res.json();
+      renderPlayers(data);
+      document.getElementById("resultBox").style.display = "none";
+    }
+
+    // --- Manual Entry ---
+    function showManualEntry() {
+      document.getElementById("manualEntryBox").style.display = "block";
+    }
+
+    function addManualPlayer() {
+      const container = document.getElementById("manualPlayersContainer");
+      const div = document.createElement("div");
+      div.innerHTML = `
+        <input type="text" placeholder="Player Name" class="manualName" />
+        <input type="number" placeholder="Score" class="manualScore" />
+      `;
+      container.appendChild(div);
+    }
+
+    async function submitManualPlayers() {
+      const names = document.querySelectorAll(".manualName");
+      const scores = document.querySelectorAll(".manualScore");
+
+      const players = [];
+      for (let i = 0; i < names.length; i++) {
+        const name = names[i].value.trim();
+        const score = parseInt(scores[i].value) || Math.floor(Math.random() * 100);
+        if (name) players.push({ name, score });
+      }
+
+      if (players.length === 0) {
+        alert("Please enter at least one player!");
+        return;
+      }
+
+      // Send to backend (if backend supports manual input)
+      await fetch(`${API_URL}/players/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ count: players.length, manual: players }),
+      });
+
+      renderPlayers(players);
+      document.getElementById("manualEntryBox").style.display = "none";
+      document.getElementById("resultBox").style.display = "none";
+    }
+
+    // --- Run Algorithm ---
+    async function runAlgorithm(method) {
+      const res = await fetch(`${API_URL}/run`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ method }),
+      });
+      const data = await res.json();
+
+      document.getElementById("winnerName").innerText = `${data.winner.name} (Score: ${data.winner.score})`;
+      document.getElementById("runnerName").innerText = `${data.runnerUp.name} (Score: ${data.runnerUp.score})`;
+      document.getElementById("comparisonCount").innerText = data.comparisons;
+      document.getElementById("resultBox").style.display = "block";
+    }
+
+    // --- Clear ---
+    async function clearPlayers() {
+      await fetch(`${API_URL}/players`, { method: "DELETE" });
+      document.getElementById("playerList").innerHTML = "";
+      document.getElementById("manualPlayersContainer").innerHTML = "";
+      document.getElementById("resultBox").style.display = "none";
+    }
+
+    // --- Render Players ---
+    async function renderPlayers(players) {
+      const list = document.getElementById("playerList");
+      list.innerHTML = "";
+      players.forEach((p) => {
+        const div = document.createElement("div");
+        div.className = "player-card";
+        div.innerHTML = `<h4>${p.name}</h4><p>Score: ${p.score}</p>`;
+        list.appendChild(div);
+      });
+    }
+
+    // --- Load existing players ---
+    window.onload = async () => {
+      const res = await fetch(`${API_URL}/players`);
+      const players = await res.json();
+      if (players.length > 0) renderPlayers(players);
+    };
+  </script>
+</body>
+</html>
