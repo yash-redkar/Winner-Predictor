@@ -6,7 +6,6 @@
   <title>Tournament Winner Predictor</title>
 
   <style>
-    /* --- Background --- */
     body {
       margin: 0;
       font-family: "Poppins", sans-serif;
@@ -26,7 +25,6 @@
       text-shadow: 0 0 15px #00d4ff;
     }
 
-    /* --- Control Panel --- */
     .controls {
       background: rgba(255, 255, 255, 0.1);
       border-radius: 16px;
@@ -62,7 +60,6 @@
       box-shadow: 0 0 15px #00d4ff;
     }
 
-    /* --- Player Cards --- */
     .players {
       display: flex;
       flex-wrap: wrap;
@@ -84,7 +81,6 @@
       margin: 5px 0;
     }
 
-    /* --- Results --- */
     .results {
       margin-top: 20px;
       text-align: center;
@@ -112,14 +108,12 @@
       margin-top: 10px;
     }
 
-    /* --- Manual Entry --- */
     #manualPlayersContainer input {
       padding: 5px;
       margin: 5px;
       border-radius: 6px;
       border: none;
     }
-
   </style>
 </head>
 
@@ -136,7 +130,6 @@
     <button class="btn" onclick="clearPlayers()">Clear All</button>
   </div>
 
-  <!-- Manual Entry Box -->
   <div id="manualEntryBox" class="controls" style="display:none;">
     <h4>Enter Players Manually</h4>
     <div id="manualPlayersContainer"></div>
@@ -148,9 +141,11 @@
 
   <div id="resultBox" class="results" style="display: none;">
     <h3>Result</h3>
-    <div class="winner">🏅 Winner: <span id="winnerName"></span></div>
-    <div class="runner">🥈 Runner-Up: <span id="runnerName"></span></div>
-    <div class="comparisons">Comparisons Made: <span id="comparisonCount"></span></div>
+    <div id="winnerDisplay" class="winner"></div>
+    <div id="runnerDisplay" class="runner"></div>
+    <div class="comparisons">
+      ⚔️ Comparisons Made: <span id="comparisonCount"></span>
+    </div>
   </div>
 
   <script>
@@ -200,12 +195,14 @@
         return;
       }
 
-      // Send to backend (if backend supports manual input)
-      await fetch(`${API_URL}/players/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ count: players.length, manual: players }),
-      });
+      // ✅ Use the correct backend route for manual players
+      for (let p of players) {
+        await fetch(`${API_URL}/players`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: p.name, score: p.score }),
+        });
+      }
 
       renderPlayers(players);
       document.getElementById("manualEntryBox").style.display = "none";
@@ -221,8 +218,29 @@
       });
       const data = await res.json();
 
-      document.getElementById("winnerName").innerText = `${data.winner.name} (Score: ${data.winner.score})`;
-      document.getElementById("runnerName").innerText = `${data.runnerUp.name} (Score: ${data.runnerUp.score})`;
+      const winnerDisplay = document.getElementById("winnerDisplay");
+      const runnerDisplay = document.getElementById("runnerDisplay");
+
+      // 🏆 Winner / Tie display
+      if (data.winners.length > 1) {
+        winnerDisplay.innerHTML = `🥇 Tie Between: ${data.winners
+          .map((w) => w.name)
+          .join(", ")} (Score: ${data.winners[0].score})`;
+      } else if (data.winners.length === 1) {
+        winnerDisplay.innerHTML = `🏅 Winner: ${data.winners[0].name} (Score: ${data.winners[0].score})`;
+      } else {
+        winnerDisplay.innerHTML = "No winner found.";
+      }
+
+      // 🥈 Runner-Up display
+      if (data.runnerUps.length > 0) {
+        runnerDisplay.innerHTML = `🥈 Runner-Up: ${data.runnerUps
+          .map((r) => r.name)
+          .join(", ")} (Score: ${data.runnerUps[0].score})`;
+      } else {
+        runnerDisplay.innerHTML = "🥈 No Runner-Up (All players tied)";
+      }
+
       document.getElementById("comparisonCount").innerText = data.comparisons;
       document.getElementById("resultBox").style.display = "block";
     }
