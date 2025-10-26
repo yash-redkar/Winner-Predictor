@@ -3,6 +3,7 @@ import { ComparisonCounter } from "../utils/comparisonCounter.js";
 export const runTournament = (players) => {
   const counter = new ComparisonCounter();
 
+  // Recursive divide & conquer tournament
   const tournament = (arr) => {
     if (arr.length === 1) return { winner: arr[0], defeated: [] };
 
@@ -27,13 +28,30 @@ export const runTournament = (players) => {
 
   const { winner, defeated } = tournament(players);
 
-  // Runner-up is among the players defeated by the winner
-  let runnerUp = defeated[0];
-  for (let i = 1; i < defeated.length; i++) {
-    if (counter.compare(defeated[i].score, runnerUp.score) > 0) {
-      runnerUp = defeated[i];
+  // Handle ties for winner
+  const topScore = winner.score;
+  const winners = players.filter((p) => p.score === topScore);
+
+  // Runner-up: max of defeated players (minimal comparisons)
+  let runnerUps = [];
+  if (defeated.length > 0) {
+    let maxScore = defeated[0].score;
+    runnerUps = [defeated[0]];
+
+    for (let i = 1; i < defeated.length; i++) {
+      const cmp = counter.compare(defeated[i].score, maxScore);
+      if (cmp > 0) {
+        maxScore = defeated[i].score;
+        runnerUps = [defeated[i]];
+      } else if (cmp === 0) {
+        runnerUps.push(defeated[i]);
+      }
     }
   }
 
-  return { winner, runnerUp, comparisons: counter.getCount() };
+  return {
+    winners,
+    runnerUps,
+    comparisons: counter.getCount(),
+  };
 };

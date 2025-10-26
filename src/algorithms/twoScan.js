@@ -3,23 +3,30 @@ import { ComparisonCounter } from "../utils/comparisonCounter.js";
 export const runTwoScan = (players) => {
   const counter = new ComparisonCounter();
 
-  // First scan: find the winner
-  let winner = players[0];
-  for (let i = 1; i < players.length; i++) {
-    if (counter.compare(players[i].score, winner.score) > 0) {
-      winner = players[i];
-    }
-  }
+  let maxScore = players[0].score;
+  let secondMaxScore = -Infinity;
 
-  // Second scan: find the best among remaining
-  let runnerUp = null;
-  for (let i = 0; i < players.length; i++) {
-    if (players[i]._id !== winner._id) {
-      if (!runnerUp || counter.compare(players[i].score, runnerUp.score) > 0) {
-        runnerUp = players[i];
+  // Single pass to find max and second max
+  for (let i = 1; i < players.length; i++) {
+    const cmp = counter.compare(players[i].score, maxScore);
+    if (cmp > 0) {
+      secondMaxScore = maxScore;
+      maxScore = players[i].score;
+    } else if (cmp < 0) {
+      const cmp2 = counter.compare(players[i].score, secondMaxScore);
+      if (cmp2 > 0) {
+        secondMaxScore = players[i].score;
       }
     }
   }
 
-  return { winner, runnerUp, comparisons: counter.getCount() };
+  // Winners and runner-ups
+  const winners = players.filter((p) => p.score === maxScore);
+  const runnerUps = players.filter((p) => p.score === secondMaxScore);
+
+  return {
+    winners,
+    runnerUps,
+    comparisons: counter.getCount(),
+  };
 };
