@@ -3,155 +3,192 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tournament Winner Predictor</title>
+  <title>Neon Tournament Predictor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      --bg-dark: #1a1a2e;
+      --bg-light: #16213e;
+      --primary: #0f3460;
+      --secondary: #e94560;
+      --accent: #533483;
+      --glow: #f72585;
+      --cyan: #4cc9f0;
+      --text: #ffffff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      margin: 0;
-      font-family: "Poppins", sans-serif;
-      background: radial-gradient(circle at center, #08143a, #020617);
-      color: white;
+      font-family: 'Rajdhani', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: center;
+      overflow-x: hidden;
     }
 
-    h1 {
-      margin-top: 30px;
-      text-align: center;
-      color: #00d4ff;
-      text-shadow: 0 0 15px #00d4ff;
-    }
+    .page { width: 95%; max-width: 1200px; padding: 20px; display: none; flex-direction: column; align-items: center; animation: fadeIn 0.6s ease-in-out; }
+    .page.active { display: flex; }
 
-    .controls {
-      background: rgba(255, 255, 255, 0.1);
+    h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: 2px; }
+    h1 { font-size: 3rem; color: var(--cyan); text-shadow: 0 0 5px var(--cyan), 0 0 15px var(--cyan), 0 0 30px var(--glow); margin-bottom: 2rem; }
+    h2 { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); margin-bottom: 1.5rem; }
+
+    .controls-box, .content-box {
+      background: rgba(15, 52, 96, 0.3);
+      border: 1px solid var(--primary);
       border-radius: 16px;
-      padding: 20px;
+      padding: 25px;
       margin-top: 20px;
-      width: 90%;
-      max-width: 600px;
-      box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-    }
-
-    .controls input {
-      padding: 10px;
-      width: 100px;
-      border: none;
-      border-radius: 6px;
-      margin-right: 10px;
+      width: 100%;
+      max-width: 800px;
+      box-shadow: 0 0 25px rgba(76, 201, 240, 0.2);
+      text-align: center;
     }
 
     .btn {
-      padding: 10px 15px;
-      border: none;
+      padding: 12px 25px;
+      border: 1px solid var(--glow);
       border-radius: 8px;
-      margin: 5px;
+      margin: 10px;
       cursor: pointer;
-      background: linear-gradient(45deg, #00c3ff, #0072ff);
-      color: white;
+      background: transparent;
+      color: var(--glow);
+      font-family: 'Orbitron', sans-serif;
       font-weight: bold;
-      transition: 0.3s;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
     }
+    .btn:hover { background: var(--glow); color: var(--text); box-shadow: 0 0 20px var(--glow); transform: translateY(-3px); }
+    .btn.primary { border-color: var(--cyan); color: var(--cyan); }
+    .btn.primary:hover { background: var(--cyan); color: var(--bg-dark); box-shadow: 0 0 20px var(--cyan); }
 
-    .btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 15px #00d4ff;
-    }
-
-    .players {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin: 20px 0;
-      gap: 10px;
-    }
-
-    .player-card {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 10px;
-      border-radius: 8px;
-      width: 120px;
-      text-align: center;
-      box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
-    }
-
-    .player-card h4 {
-      margin: 5px 0;
-    }
-
-    .results {
-      margin-top: 20px;
-      text-align: center;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 15px;
-      width: 90%;
-      max-width: 500px;
-    }
-
-    .winner {
-      font-size: 1.2em;
-      color: gold;
-      text-shadow: 0 0 10px gold;
-    }
-
-    .runner {
-      font-size: 1.1em;
-      color: silver;
-      text-shadow: 0 0 8px silver;
-    }
-
-    .comparisons {
-      color: #00d4ff;
-      margin-top: 10px;
-    }
-
-    #manualPlayersContainer input {
-      padding: 5px;
-      margin: 5px;
+    input[type="number"], input[type="text"] {
+      padding: 12px;
+      border: 1px solid var(--primary);
+      background: var(--bg-dark);
+      color: var(--text);
       border-radius: 6px;
-      border: none;
+      margin: 5px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      text-align: center;
     }
+
+    .players { display: flex; flex-wrap: wrap; justify-content: center; margin: 20px 0; gap: 15px; width: 100%; }
+    .player-card {
+      background: var(--primary);
+      border: 1px solid var(--cyan);
+      padding: 15px;
+      border-radius: 8px;
+      width: 150px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      animation: slideInUp 0.5s ease-out forwards;
+      opacity: 0;
+    }
+    .player-card:hover { transform: translateY(-5px); box-shadow: 0 0 20px rgba(76, 201, 240, 0.7); }
+    .player-card h4 { font-family: 'Orbitron', sans-serif; color: var(--cyan); margin: 5px 0; }
+    .player-card p { font-size: 1.1rem; font-weight: 600; }
+
+    #page-results .content-box { animation: pulse-glow 2s infinite alternate; }
+    .winner { font-size: 2.2rem; color: gold; text-shadow: 0 0 15px gold; }
+    .runner { font-size: 1.8rem; color: silver; text-shadow: 0 0 10px silver; }
+    .comparisons { font-size: 1.2rem; color: var(--cyan); margin-top: 20px; }
+
+    #manualPlayersContainer .manual-player-input { margin-bottom: 10px; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+    @keyframes slideInUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse-glow { from { box-shadow: 0 0 25px rgba(76, 201, 240, 0.2); } to { box-shadow: 0 0 40px rgba(247, 37, 133, 0.5); } }
+
   </style>
 </head>
 
 <body>
-  <h1>🏆 Tournament Winner Predictor</h1>
 
-  <div class="controls">
-    <label>Number of Players:</label>
-    <input type="number" id="playerCount" value="128" min="2" />
-    <button class="btn" onclick="generatePlayers()">Generate Random</button>
-    <button class="btn" onclick="showManualEntry()">Manual Entry</button>
-    <button class="btn" onclick="runAlgorithm('tournament')">Divide & Conquer</button>
-    <button class="btn" onclick="runAlgorithm('two-scan')">Iterative Scan</button>
-    <button class="btn" onclick="clearPlayers()">Clear All</button>
+  <div id="page-home" class="page active">
+    <h1>Neon Tournament</h1>
+    <div class="content-box">
+        <h2>Welcome, Challenger!</h2>
+        <p>Prepare for battle. Generate a random list of competitors or enter them manually to find the ultimate champion using powerful algorithms.</p>
+        <button class="btn" onclick="showPage('page-setup')">Start a New Tournament</button>
+        <button class="btn primary" onclick="resetAndClear()">Clear All Data</button>
+    </div>
   </div>
 
-  <div id="manualEntryBox" class="controls" style="display:none;">
-    <h4>Enter Players Manually</h4>
-    <div id="manualPlayersContainer"></div>
-    <button class="btn" onclick="addManualPlayer()">Add Player</button>
-    <button class="btn" onclick="submitManualPlayers()">Submit Players</button>
+  <div id="page-setup" class="page">
+    <h2>Tournament Setup</h2>
+    <div class="controls-box">
+        <h3>Generate Random Players</h3>
+        <label>Number of Players:</label>
+        <input type="number" id="playerCount" value="16" min="2" />
+        <button class="btn primary" onclick="handleGeneratePlayers()">Generate Players</button>
+    </div>
+     <div class="controls-box">
+        <h3>Or Enter Manually</h3>
+        <button class="btn" onclick="showPage('page-manual')">Manual Entry</button>
+    </div>
+  </div>
+  
+  <div id="page-manual" class="page">
+      <h2>Manual Player Entry</h2>
+      <div class="content-box">
+          <div id="manualPlayersContainer"></div>
+          <button class="btn" onclick="addManualPlayer()">+ Add Player Slot</button>
+          <button class="btn primary" onclick="submitManualPlayers()">Submit Players</button>
+      </div>
   </div>
 
-  <div id="playerList" class="players"></div>
+  <div id="page-tournament" class="page">
+    <h2>Competitors Ready!</h2>
+    <div id="playerList" class="players"></div>
+     <div class="controls-box">
+        <h3>Run Simulation</h3>
+        <button class="btn" onclick="runAlgorithm('tournament')">Divide & Conquer</button>
+        <button class="btn" onclick="runAlgorithm('two-scan')">Iterative Scan</button>
+        <button class="btn primary" onclick="resetAndClear()">Start Over</button>
+    </div>
+  </div>
 
-  <div id="resultBox" class="results" style="display: none;">
-    <h3>Result</h3>
-    <div id="winnerDisplay" class="winner"></div>
-    <div id="runnerDisplay" class="runner"></div>
-    <div class="comparisons">
-      ⚔️ Comparisons Made: <span id="comparisonCount"></span>
+  <div id="page-results" class="page">
+    <h2>Final Results</h2>
+    <div class="content-box">
+        <div id="winnerDisplay" class="result-item winner"></div>
+        <div id="runnerDisplay" class="result-item runner"></div>
+        <div class="result-item comparisons">
+            ⚔ Comparisons Made: <span id="comparisonCount"></span>
+        </div>
+        <button class="btn" onclick="resetAndClear()">Play Again</button>
     </div>
   </div>
 
   <script>
     const API_URL = "http://localhost:4075/api";
+    let currentPage = 'page-home';
 
-    // --- Random Generation ---
+    // --- Page Navigation ---
+    function showPage(pageId) {
+      document.getElementById(currentPage).classList.remove('active');
+      document.getElementById(pageId).classList.add('active');
+      currentPage = pageId;
+      if(pageId === 'page-tournament') loadPlayers();
+    }
+
+    // --- Player Generation & Setup ---
+    async function handleGeneratePlayers() {
+        await generatePlayers();
+        showPage('page-tournament');
+    }
+
     async function generatePlayers() {
       const count = document.getElementById("playerCount").value;
       const res = await fetch(`${API_URL}/players/generate`, {
@@ -161,17 +198,13 @@
       });
       const data = await res.json();
       renderPlayers(data);
-      document.getElementById("resultBox").style.display = "none";
     }
 
     // --- Manual Entry ---
-    function showManualEntry() {
-      document.getElementById("manualEntryBox").style.display = "block";
-    }
-
     function addManualPlayer() {
       const container = document.getElementById("manualPlayersContainer");
       const div = document.createElement("div");
+      div.className = "manual-player-input";
       div.innerHTML = `
         <input type="text" placeholder="Player Name" class="manualName" />
         <input type="number" placeholder="Score" class="manualScore" />
@@ -182,20 +215,21 @@
     async function submitManualPlayers() {
       const names = document.querySelectorAll(".manualName");
       const scores = document.querySelectorAll(".manualScore");
-
       const players = [];
+
       for (let i = 0; i < names.length; i++) {
         const name = names[i].value.trim();
-        const score = parseInt(scores[i].value) || Math.floor(Math.random() * 100);
-        if (name) players.push({ name, score });
+        const score = parseInt(scores[i].value);
+        if (name && !isNaN(score)) players.push({ name, score });
       }
 
-      if (players.length === 0) {
-        alert("Please enter at least one player!");
+      if (players.length < 2) {
+        alert("Please enter at least two players with valid scores!");
         return;
       }
 
-      // ✅ Use the correct backend route for manual players
+      await fetch(`${API_URL}/players`, { method: "DELETE" });
+
       for (let p of players) {
         await fetch(`${API_URL}/players`, {
           method: "POST",
@@ -205,71 +239,78 @@
       }
 
       renderPlayers(players);
-      document.getElementById("manualEntryBox").style.display = "none";
-      document.getElementById("resultBox").style.display = "none";
+      showPage('page-tournament');
     }
 
-    // --- Run Algorithm ---
-    async function runAlgorithm(method) {
-      const res = await fetch(`${API_URL}/run`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ method }),
-      });
+    // --- Load existing players ---
+    async function loadPlayers() {
+      const res = await fetch(`${API_URL}/players`);
       const data = await res.json();
-
-      const winnerDisplay = document.getElementById("winnerDisplay");
-      const runnerDisplay = document.getElementById("runnerDisplay");
-
-      // 🏆 Winner / Tie display
-      if (data.winners.length > 1) {
-        winnerDisplay.innerHTML = `🥇 Tie Between: ${data.winners
-          .map((w) => w.name)
-          .join(", ")} (Score: ${data.winners[0].score})`;
-      } else if (data.winners.length === 1) {
-        winnerDisplay.innerHTML = `🏅 Winner: ${data.winners[0].name} (Score: ${data.winners[0].score})`;
-      } else {
-        winnerDisplay.innerHTML = "No winner found.";
-      }
-
-      // 🥈 Runner-Up display
-      if (data.runnerUps.length > 0) {
-        runnerDisplay.innerHTML = `🥈 Runner-Up: ${data.runnerUps
-          .map((r) => r.name)
-          .join(", ")} (Score: ${data.runnerUps[0].score})`;
-      } else {
-        runnerDisplay.innerHTML = "🥈 No Runner-Up (All players tied)";
-      }
-
-      document.getElementById("comparisonCount").innerText = data.comparisons;
-      document.getElementById("resultBox").style.display = "block";
+      renderPlayers(data);
     }
 
-    // --- Clear ---
-    async function clearPlayers() {
-      await fetch(`${API_URL}/players`, { method: "DELETE" });
-      document.getElementById("playerList").innerHTML = "";
-      document.getElementById("manualPlayersContainer").innerHTML = "";
-      document.getElementById("resultBox").style.display = "none";
+    // --- Run Algorithm & Display Results ---
+    async function runAlgorithm(method) {
+      try {
+        const res = await fetch(`${API_URL}/run`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ method }),
+        });
+        if (!res.ok) throw new Error('No players to run the algorithm on.');
+        
+        const data = await res.json();
+
+        const winnerDisplay = document.getElementById("winnerDisplay");
+        const runnerDisplay = document.getElementById("runnerDisplay");
+
+        if (data.winners.length > 1) {
+            winnerDisplay.innerHTML = `🥇 TIE: ${data.winners.map(w => w.name).join(", ")} (Score: ${data.winners[0].score})`;
+        } else {
+            winnerDisplay.innerHTML = `🏆 WINNER: ${data.winners[0].name} (Score: ${data.winners[0].score})`;
+        }
+
+        if (data.runnerUps.length > 0) {
+            runnerDisplay.innerHTML = `🥈 RUNNER-UP: ${data.runnerUps.map(r => r.name).join(", ")} (Score: ${data.runnerUps[0].score})`;
+        } else {
+            runnerDisplay.innerHTML = "No Runner-Up Found";
+        }
+
+        document.getElementById("comparisonCount").innerText = data.comparisons;
+        showPage('page-results');
+
+      } catch (error) {
+        alert(error.message);
+        console.error("Error running algorithm:", error);
+      }
     }
 
-    // --- Render Players ---
-    async function renderPlayers(players) {
+    // --- UI & State Management ---
+    async function resetAndClear() {
+        await fetch(`${API_URL}/players`, { method: "DELETE" });
+        document.getElementById("playerList").innerHTML = "";
+        document.getElementById("manualPlayersContainer").innerHTML = "";
+        showPage('page-home');
+        addManualPlayer();
+        addManualPlayer();
+    }
+
+    function renderPlayers(players) {
       const list = document.getElementById("playerList");
       list.innerHTML = "";
-      players.forEach((p) => {
+      players.forEach((p, index) => {
         const div = document.createElement("div");
         div.className = "player-card";
-        div.innerHTML = `<h4>${p.name}</h4><p>Score: ${p.score}</p>`;
+        div.style.animationDelay = `${index * 0.05}s`;
+        div.innerHTML = `<h4>${p.name}</h4><p>${p.score}</p>`;
         list.appendChild(div);
       });
     }
 
-    // --- Load existing players ---
-    window.onload = async () => {
-      const res = await fetch(`${API_URL}/players`);
-      const players = await res.json();
-      if (players.length > 0) renderPlayers(players);
+    // --- Initial Load ---
+    window.onload = () => {
+        addManualPlayer();
+        addManualPlayer();
     };
   </script>
 </body>
