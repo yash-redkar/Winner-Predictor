@@ -37,7 +37,16 @@
     .page.active { display: flex; }
 
     h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: 2px; }
-    h1 { font-size: 3rem; color: var(--cyan); text-shadow: 0 0 5px var(--cyan), 0 0 15px var(--cyan), 0 0 30px var(--glow); margin-bottom: 2rem; }
+    h1 {
+      font-size: 3rem;
+      color: var(--cyan);
+      text-shadow: 0 0 5px var(--cyan), 0 0 15px var(--cyan), 0 0 30px var(--glow);
+      margin-bottom: 2rem;
+      text-align: center;
+      width: 100%;
+      display: block;
+      margin-top: 60px;
+    }
     h2 { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); margin-bottom: 1.5rem; }
 
     .controls-box, .content-box {
@@ -69,6 +78,16 @@
     .btn:hover { background: var(--glow); color: var(--text); box-shadow: 0 0 20px var(--glow); transform: translateY(-3px); }
     .btn.primary { border-color: var(--cyan); color: var(--cyan); }
     .btn.primary:hover { background: var(--cyan); color: var(--bg-dark); box-shadow: 0 0 20px var(--cyan); }
+    .btn.primary:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 25px var(--glow);
+    }
+
+    button.processing {
+      animation: glow 1s infinite alternate;
+      background: #ff004c;
+      box-shadow: 0 0 10px #ff004c, 0 0 20px #ff004c;
+    }
 
     input[type="number"], input[type="text"] {
       padding: 12px;
@@ -109,65 +128,73 @@
     @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
     @keyframes slideInUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes pulse-glow { from { box-shadow: 0 0 25px rgba(76, 201, 240, 0.2); } to { box-shadow: 0 0 40px rgba(247, 37, 133, 0.5); } }
-
   </style>
 </head>
 
 <body>
 
+  <!-- HOME PAGE -->
   <div id="page-home" class="page active">
-    <h1>Neon Tournament</h1>
+    <h1>Winner Tournament Predictor</h1>
     <div class="content-box">
-        <h2>Welcome, Challenger!</h2>
-        <p>Prepare for battle. Generate a random list of competitors or enter them manually to find the ultimate champion using powerful algorithms.</p>
-        <button class="btn" onclick="showPage('page-setup')">Start a New Tournament</button>
-        <button class="btn primary" onclick="resetAndClear()">Clear All Data</button>
+      <h2>Where Algorithms Decide the Ultimate Winner</h2>
+      <p>Experience the power of data-driven decision making! Generate random players or input your own and let our advanced algorithms predict the ultimate champion with precision.</p>
+      <button class="btn" onclick="showPage('page-setup')">Start a New Tournament</button>
     </div>
   </div>
 
+  <!-- SETUP PAGE -->
   <div id="page-setup" class="page">
     <h2>Tournament Setup</h2>
     <div class="controls-box">
-        <h3>Generate Random Players</h3>
-        <label>Number of Players:</label>
-        <input type="number" id="playerCount" value="16" min="2" />
-        <button class="btn primary" onclick="handleGeneratePlayers()">Generate Players</button>
+      <h3>Generate Random Players</h3>
+      <label>Number of Players:</label>
+      <input type="number" id="playerCount" value="16" min="2" />
+      <button class="btn primary" onclick="handleGeneratePlayers()">Generate Players</button>
     </div>
-     <div class="controls-box">
-        <h3>Or Enter Manually</h3>
-        <button class="btn" onclick="showPage('page-manual')">Manual Entry</button>
+    <div class="controls-box">
+      <h3>Or Enter Manually</h3>
+      <button class="btn" onclick="showPage('page-manual')">Manual Entry</button>
     </div>
-  </div>
-  
-  <div id="page-manual" class="page">
-      <h2>Manual Player Entry</h2>
-      <div class="content-box">
-          <div id="manualPlayersContainer"></div>
-          <button class="btn" onclick="addManualPlayer()">+ Add Player Slot</button>
-          <button class="btn primary" onclick="submitManualPlayers()">Submit Players</button>
-      </div>
   </div>
 
+  <!-- MANUAL ENTRY PAGE -->
+  <div id="page-manual" class="page">
+    <h2>Manual Player Entry</h2>
+    <div class="content-box">
+      <div id="manualPlayersContainer"></div>
+      <button class="btn" onclick="addManualPlayer()">+ Add Player Slot</button>
+      <button class="btn primary" onclick="submitManualPlayers()">Submit Players</button>
+    </div>
+  </div>
+
+  <!-- TOURNAMENT PAGE -->
   <div id="page-tournament" class="page">
     <h2>Competitors Ready!</h2>
     <div id="playerList" class="players"></div>
-     <div class="controls-box">
-        <h3>Run Simulation</h3>
-        <button class="btn" onclick="runAlgorithm('tournament')">Divide & Conquer</button>
-        <button class="btn" onclick="runAlgorithm('two-scan')">Iterative Scan</button>
-        <button class="btn primary" onclick="resetAndClear()">Start Over</button>
+    <div class="controls-box">
+      <h3>Run Simulation</h3>
+      <button class="btn" onclick="runAlgorithm('tournament')">Divide & Conquer</button>
+      <button class="btn" onclick="runAlgorithm('two-scan')">Iterative Scan</button>
+      <button class="btn primary" onclick="compareAlgorithms()">Compare</button>
     </div>
   </div>
 
+  <!-- RESULTS PAGE -->
   <div id="page-results" class="page">
     <h2>Final Results</h2>
     <div class="content-box">
-        <div id="winnerDisplay" class="result-item winner"></div>
-        <div id="runnerDisplay" class="result-item runner"></div>
-        <div class="result-item comparisons">
-            ⚔ Comparisons Made: <span id="comparisonCount"></span>
-        </div>
-        <button class="btn" onclick="resetAndClear()">Play Again</button>
+      <div id="winnerDisplay" class="result-item winner"></div>
+      <div id="runnerDisplay" class="result-item runner"></div>
+      <div class="result-item comparisons">
+        ⚔ Comparisons Made: <span id="comparisonCount"></span>
+      </div>
+
+      <!-- ✅ Added Buttons -->
+      <div style="margin-top: 20px;">
+        <button class="btn" onclick="showPage('page-tournament')">🔙 Back</button>
+        <button class="btn primary" onclick="resetAndClear()">Play Again</button>
+      </div>
     </div>
   </div>
 
@@ -175,18 +202,16 @@
     const API_URL = "http://localhost:4075/api";
     let currentPage = 'page-home';
 
-    // --- Page Navigation ---
     function showPage(pageId) {
       document.getElementById(currentPage).classList.remove('active');
       document.getElementById(pageId).classList.add('active');
       currentPage = pageId;
-      if(pageId === 'page-tournament') loadPlayers();
+      if (pageId === 'page-tournament') loadPlayers();
     }
 
-    // --- Player Generation & Setup ---
     async function handleGeneratePlayers() {
-        await generatePlayers();
-        showPage('page-tournament');
+      await generatePlayers();
+      showPage('page-tournament');
     }
 
     async function generatePlayers() {
@@ -200,7 +225,6 @@
       renderPlayers(data);
     }
 
-    // --- Manual Entry ---
     function addManualPlayer() {
       const container = document.getElementById("manualPlayersContainer");
       const div = document.createElement("div");
@@ -224,17 +248,16 @@
       }
 
       if (players.length < 2) {
-        alert("Please enter at least two players with valid scores!");
+        alert("Please enter at least two players!");
         return;
       }
 
       await fetch(`${API_URL}/players`, { method: "DELETE" });
-
       for (let p of players) {
         await fetch(`${API_URL}/players`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: p.name, score: p.score }),
+          body: JSON.stringify(p),
         });
       }
 
@@ -242,75 +265,148 @@
       showPage('page-tournament');
     }
 
-    // --- Load existing players ---
     async function loadPlayers() {
       const res = await fetch(`${API_URL}/players`);
       const data = await res.json();
       renderPlayers(data);
     }
 
-    // --- Run Algorithm & Display Results ---
     async function runAlgorithm(method) {
       try {
         const res = await fetch(`${API_URL}/run`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ method }),
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ method }),
         });
-        if (!res.ok) throw new Error('No players to run the algorithm on.');
-        
-        const data = await res.json();
 
+        const data = await res.json();
         const winnerDisplay = document.getElementById("winnerDisplay");
         const runnerDisplay = document.getElementById("runnerDisplay");
 
         if (data.winners.length > 1) {
-            winnerDisplay.innerHTML = `🥇 TIE: ${data.winners.map(w => w.name).join(", ")} (Score: ${data.winners[0].score})`;
+          winnerDisplay.innerHTML = `🥇 TIE detected among ${data.winners.length} players — resolving...`;
+          runnerDisplay.innerHTML = "";
+          document.getElementById("comparisonCount").innerText = data.comparisons;
+          showPage('page-results');
+
+          setTimeout(async () => {
+            const res2 = await fetch(`${API_URL}/run`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ method, tieBreaker: true }),
+            });
+            const finalData = await res2.json();
+            winnerDisplay.innerHTML = `🏆 WINNER (After Tie-Breaker): ${finalData.winners[0].name} (Score: ${finalData.winners[0].score})`;
+            runnerDisplay.innerHTML = `🥈 RUNNER-UP: ${finalData.runnerUps[0].name} (Score: ${finalData.runnerUps[0].score})`;
+            document.getElementById("comparisonCount").innerText = finalData.comparisons;
+          }, 1000);
         } else {
-            winnerDisplay.innerHTML = `🏆 WINNER: ${data.winners[0].name} (Score: ${data.winners[0].score})`;
+          winnerDisplay.innerHTML = `🏆 WINNER: ${data.winners[0].name} (Score: ${data.winners[0].score})`;
+          runnerDisplay.innerHTML = `🥈 RUNNER-UP: ${data.runnerUps[0].name} (Score: ${data.runnerUps[0].score})`;
+          document.getElementById("comparisonCount").innerText = data.comparisons;
+          document.querySelector(".comparisons").style.display = "block";
+          showPage('page-results');
         }
 
-        if (data.runnerUps.length > 0) {
-            runnerDisplay.innerHTML = `🥈 RUNNER-UP: ${data.runnerUps.map(r => r.name).join(", ")} (Score: ${data.runnerUps[0].score})`;
-        } else {
-            runnerDisplay.innerHTML = "No Runner-Up Found";
-        }
-
-        document.getElementById("comparisonCount").innerText = data.comparisons;
-        showPage('page-results');
-
-      } catch (error) {
-        alert(error.message);
-        console.error("Error running algorithm:", error);
+      } catch (err) {
+        alert("Error running algorithm!");
       }
     }
 
-    // --- UI & State Management ---
+    async function compareAlgorithms() {
+      const btn = document.querySelector("button[onclick='compareAlgorithms()']");
+      btn.classList.add("processing");
+      btn.innerText = "Comparing...";
+
+      try {
+        const methods = ["tournament", "two-scan"];
+        const results = {};
+
+        for (let method of methods) {
+          let res = await fetch(`${API_URL}/run`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ method }),
+          });
+          let data = await res.json();
+          if (data.winners.length > 1) {
+            const tieRes = await fetch(`${API_URL}/run`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ method, tieBreaker: true }),
+            });
+            data = await tieRes.json();
+          }
+          results[method] = data;
+        }
+
+        const winnerDisplay = document.getElementById("winnerDisplay");
+        const runnerDisplay = document.getElementById("runnerDisplay");
+        const comparisonCount = document.getElementById("comparisonCount");
+
+        winnerDisplay.innerHTML = `
+          <strong>Comparison Between Algorithms</strong><br><br>
+          <table style="margin:auto; border-collapse:collapse; text-align:center; color:white;">
+            <tr>
+              <th style="padding:10px; border-bottom:1px solid #4cc9f0;">Method</th>
+              <th style="padding:10px; border-bottom:1px solid #4cc9f0;">Winner</th>
+              <th style="padding:10px; border-bottom:1px solid #4cc9f0;">Runner-Up</th>
+              <th style="padding:10px; border-bottom:1px solid #4cc9f0;">Comparisons</th>
+            </tr>
+            <tr>
+              <td style="padding:8px;">Divide & Conquer</td>
+              <td style="padding:8px;">${results["tournament"].winners[0].name}</td>
+              <td style="padding:8px;">${results["tournament"].runnerUps[0].name}</td>
+              <td style="padding:8px;">${results["tournament"].comparisons}</td>
+            </tr>
+            <tr>
+              <td style="padding:8px;">Iterative Scan</td>
+              <td style="padding:8px;">${results["two-scan"].winners[0].name}</td>
+              <td style="padding:8px;">${results["two-scan"].runnerUps[0].name}</td>
+              <td style="padding:8px;">${results["two-scan"].comparisons}</td>
+            </tr>
+          </table>
+        `;
+
+        runnerDisplay.innerHTML = "";
+        comparisonCount.innerText = "";
+        document.querySelector(".comparisons").style.display = "none";
+        showPage("page-results");
+
+      } catch (err) {
+        alert("Error comparing algorithms!");
+      } finally {
+        btn.classList.remove("processing");
+        btn.innerText = "Compare";
+      }
+    }
+    
+    // --- Reset ---
     async function resetAndClear() {
-        await fetch(`${API_URL}/players`, { method: "DELETE" });
-        document.getElementById("playerList").innerHTML = "";
-        document.getElementById("manualPlayersContainer").innerHTML = "";
-        showPage('page-home');
-        addManualPlayer();
-        addManualPlayer();
+      await fetch(`${API_URL}/players`, { method: "DELETE" });
+      document.getElementById("playerList").innerHTML = "";
+      document.getElementById("manualPlayersContainer").innerHTML = "";
+      showPage('page-home');
+      addManualPlayer();
+      addManualPlayer();
     }
 
+    // --- Render Players ---
     function renderPlayers(players) {
       const list = document.getElementById("playerList");
       list.innerHTML = "";
-      players.forEach((p, index) => {
+      players.forEach((p, i) => {
         const div = document.createElement("div");
         div.className = "player-card";
-        div.style.animationDelay = `${index * 0.05}s`;
+        div.style.animationDelay = `${i * 0.05}s`;
         div.innerHTML = `<h4>${p.name}</h4><p>${p.score}</p>`;
         list.appendChild(div);
       });
     }
 
-    // --- Initial Load ---
     window.onload = () => {
-        addManualPlayer();
-        addManualPlayer();
+      addManualPlayer();
+      addManualPlayer();
     };
   </script>
 </body>
