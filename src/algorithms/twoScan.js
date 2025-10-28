@@ -3,29 +3,59 @@ import { ComparisonCounter } from "../utils/comparisonCounter.js";
 export const runTwoScan = (players) => {
   const counter = new ComparisonCounter();
 
-  let maxScore = players[0].score;
-  let secondMaxScore = -Infinity;
-  let maxId = players[0].id;
+  if (players.length === 0) {
+    return { winners: [], runnerUps: [], comparisons: 0 };
+  }
 
-  // Single pass to find max and second max
+  // Initialize with the first player
+  let winner = players[0];
+  let runnerUp = null; // Will store the single runner-up player object
+
+  // Single pass to find winner and the specific runner-up based on your tie-break rule
   for (let i = 1; i < players.length; i++) {
-    const cmp = counter.compare(players[i].score, maxScore);
-    if (cmp > 0 || (cmp === 0 && players[i].id < maxId)) {
-      // New winner or tie (smaller ID wins tie)
-      secondMaxScore = maxScore;
-      maxScore = players[i].score;
-      maxId = players[i].id; // store ID for tie-break
-    } else if (cmp < 0) {
-      const cmp2 = counter.compare(players[i].score, secondMaxScore);
-      if (cmp2 > 0) {
-        secondMaxScore = players[i].score;
+    const currentPlayer = players[i];
+    const cmp = counter.compare(currentPlayer.score, winner.score);
+
+    if (cmp > 0) {
+      // Case 1: New undisputed winner
+      // The current winner is demoted to the new runner-up
+      runnerUp = winner;
+      winner = currentPlayer;
+    } else if (cmp === 0) {
+      // Case 2: Tie for max score - Apply the specific tie-break rule: lower ID wins
+      if (currentPlayer.id < winner.id) {
+        // Current player is the new winner (due to lower ID)
+        // The old winner is demoted to the new runner-up
+        runnerUp = winner;
+        winner = currentPlayer;
+      } else {
+        // Current player is NOT the winner (higher ID loses tie-break)
+        // Check if the current player is better than the current runner-up
+        if (
+          !runnerUp ||
+          counter.compare(currentPlayer.score, runnerUp.score) > 0
+        ) {
+          runnerUp = currentPlayer;
+        }
+        // Note: If currentPlayer.score == runnerUp.score,
+        // the current runnerUp remains as we are only tracking one.
+      }
+    } else {
+      // cmp < 0 (Current player has a lower score than the current winner)
+      // Case 3: Check if the current player is better than the current runner-up
+      if (
+        !runnerUp ||
+        counter.compare(currentPlayer.score, runnerUp.score) > 0
+      ) {
+        runnerUp = currentPlayer;
       }
     }
   }
 
-  // Winners and runner-ups
-  const winners = players.filter((p) => p.score === maxScore);
-  const runnerUps = players.filter((p) => p.score === secondMaxScore);
+  // The output format expects arrays, so we wrap the single player objects
+  const winners = [winner];
+  // Runner-up might be null if n<2 or all scores were the same as the winner
+  const runnerUps = runnerUp ? [runnerUp] : [];
 
   return {
     winners,
