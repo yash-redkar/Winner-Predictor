@@ -304,8 +304,8 @@
           winnerDisplay.innerHTML = `🏆 WINNER: ${data.winners[0].name} (Score: ${data.winners[0].score})`;
           runnerDisplay.innerHTML = `🥈 RUNNER-UP: ${data.runnerUps[0].name} (Score: ${data.runnerUps[0].score})`;
           document.getElementById("comparisonCount").innerText = data.comparisons;
-          document.querySelector(".comparisons").style.display = "block";
           showPage('page-results');
+          document.querySelector(".comparisons").style.display = "block";
         }
 
       } catch (err) {
